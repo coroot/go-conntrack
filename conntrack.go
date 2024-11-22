@@ -218,7 +218,7 @@ func (nfct *Nfct) Query(t Table, f Family, filter FilterAttr) ([]Con, error) {
 }
 
 // Get returns matching conntrack entries with certain attributes
-func (nfct *Nfct) Get(t Table, f Family, match Con) ([]Con, error) {
+func (nfct *Nfct) Get(t Table, f Family, match Con, useDump bool) ([]Con, error) {
 	if t != Conntrack {
 		return nil, ErrUnknownCtTable
 	}
@@ -229,10 +229,15 @@ func (nfct *Nfct) Get(t Table, f Family, match Con) ([]Con, error) {
 	data := putExtraHeader(uint8(f), unix.NFNETLINK_V0, unix.NFNL_SUBSYS_CTNETLINK)
 	data = append(data, query...)
 
+	flag := netlink.Acknowledge
+	if useDump {
+		flag = netlink.Dump
+	}
+
 	req := netlink.Message{
 		Header: netlink.Header{
 			Type:  netlink.HeaderType(t << 8),
-			Flags: netlink.Request | netlink.Acknowledge,
+			Flags: netlink.Request | flag,
 		},
 		Data: data,
 	}

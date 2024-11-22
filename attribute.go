@@ -662,6 +662,12 @@ func marshalIPTuple(logger *log.Logger, v *IPTuple) ([]byte, error) {
 		ae.Bytes(ctaTupleProto|nlafNested, data)
 	}
 
+	if v.Zone != nil {
+		ae.ByteOrder = binary.BigEndian
+		ae.Uint16(ctaTupleZone, *v.Zone)
+		ae.ByteOrder = nativeEndian
+	}
+
 	return ae.Encode()
 }
 
